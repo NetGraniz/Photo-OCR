@@ -3,11 +3,18 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Photo OCR</title>
+    <title>Photo OCR - распознавание текста с изображения онлайн</title>
     <meta
       name="description"
-      content="Быстрый OCR-инструмент для распознавания русского и английского текста с изображений прямо в браузере."
+      content="Бесплатный OCR-инструмент для распознавания русского и английского текста с изображений прямо в браузере. Работает без сервера и без загрузки изображений наружу."
     >
+    <meta property="og:title" content="Photo OCR - распознавание текста с изображения онлайн">
+    <meta
+      property="og:description"
+      content="Бесплатный OCR-инструмент для распознавания русского и английского текста с изображений прямо в браузере. Работает без сервера и без загрузки изображений наружу."
+    >
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://netgraniz.github.io/Photo-OCR/">
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
     <script src="script.js" defer></script>
@@ -18,37 +25,78 @@
         <div>
           <p class="eyebrow">Local browser OCR</p>
           <h1>Photo OCR</h1>
+          <p class="header-copy">
+            Изображения не сохраняются и не передаются на сервер. Распознавание выполняется локально в браузере.
+          </p>
         </div>
-        <div class="status-pill" id="appStatus">Готов к вставке</div>
+        <div class="status-pill" id="appStatus" role="status">Готов к вставке</div>
       </header>
 
       <section class="workspace" aria-label="OCR workspace">
         <div class="input-panel">
+          <div class="panel-title">
+            <h2>Изображение</h2>
+            <p>Вставьте изображение через Ctrl+V, загрузите файл или перетащите его сюда.</p>
+          </div>
+
           <label class="drop-zone" id="pasteZone" for="fileInput" tabindex="0">
             <input id="fileInput" type="file" accept="image/*">
             <span class="empty-state" id="emptyState">
               <strong>Вставьте изображение через Ctrl+V</strong>
-              <span>или загрузите файл</span>
+              <span>загрузите файл или перетащите его сюда</span>
             </span>
             <img id="previewImage" alt="Предпросмотр изображения" hidden>
           </label>
 
-          <div class="controls" aria-label="Панель управления">
-            <label class="select-label" for="languageSelect">
-              <span>Язык OCR</span>
-              <select id="languageSelect">
-                <option value="rus">Русский</option>
-                <option value="eng">Английский</option>
-                <option value="rus+eng" selected>Русский + Английский</option>
-              </select>
-            </label>
+          <div class="notice" id="messageBox" role="alert" hidden></div>
 
-            <div class="button-row">
+          <div class="controls" aria-label="Панель управления">
+            <div class="settings-grid">
+              <label class="field-label" for="languageSelect">
+                <span>Язык OCR</span>
+                <select id="languageSelect">
+                  <option value="rus">Русский</option>
+                  <option value="eng">Английский</option>
+                  <option value="rus+eng" selected>Русский + Английский</option>
+                </select>
+              </label>
+
+              <label class="field-label" for="processingMode">
+                <span>Обработка</span>
+                <select id="processingMode">
+                  <option value="original">Оригинал</option>
+                  <option value="screenshot" selected>Скриншот</option>
+                  <option value="document">Документ</option>
+                  <option value="strong">Сильный контраст</option>
+                  <option value="binary">Чёрно-белый</option>
+                  <option value="invert">Инверсия</option>
+                </select>
+              </label>
+
+              <label class="field-label" for="textMode">
+                <span>Тип текста</span>
+                <select id="textMode">
+                  <option value="text" selected>Обычный текст</option>
+                  <option value="single-line">Одна строка</option>
+                  <option value="table">Таблица / колонки</option>
+                  <option value="digits">Только цифры</option>
+                </select>
+              </label>
+
+              <label class="switch-label" for="autoRecognize">
+                <input id="autoRecognize" type="checkbox">
+                <span>Автораспознавание</span>
+              </label>
+            </div>
+
+            <div class="button-grid main-actions">
+              <button id="clipboardButton" type="button">Вставить из буфера</button>
               <button class="primary" id="recognizeButton" type="button" disabled>
                 Распознать текст
               </button>
-              <button id="copyButton" type="button" disabled>Копировать текст</button>
-              <button id="clearButton" type="button">Очистить</button>
+              <button id="rotateLeftButton" type="button" disabled>Повернуть влево</button>
+              <button id="rotateRightButton" type="button" disabled>Повернуть вправо</button>
+              <button id="clearButton" type="button">Очистить всё</button>
             </div>
           </div>
 
@@ -62,12 +110,28 @@
         </div>
 
         <div class="result-panel">
-          <label for="resultText">Результат OCR</label>
+          <div class="panel-title result-title">
+            <div>
+              <h2>Результат OCR</h2>
+              <p>Текст можно выделять, править вручную, копировать или скачать.</p>
+            </div>
+            <div class="result-actions">
+              <button id="copyButton" type="button" disabled>Копировать</button>
+              <button id="downloadButton" type="button" disabled>Скачать .txt</button>
+            </div>
+          </div>
+
           <textarea
             id="resultText"
             spellcheck="false"
             placeholder="Распознанный текст появится здесь. Его можно редактировать вручную."
           ></textarea>
+
+          <div class="button-grid text-actions">
+            <button id="fixLineBreaksButton" type="button" disabled>Убрать лишние переносы</button>
+            <button id="fixSpacesButton" type="button" disabled>Убрать двойные пробелы</button>
+            <button id="clearResultButton" type="button" disabled>Очистить результат</button>
+          </div>
         </div>
       </section>
     </main>
