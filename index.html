@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Photo OCR</title>
+    <meta
+      name="description"
+      content="Быстрый OCR-инструмент для распознавания русского и английского текста с изображений прямо в браузере."
+    >
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <p class="eyebrow">Local browser OCR</p>
+          <h1>Photo OCR</h1>
+        </div>
+        <div class="status-pill" id="appStatus">Готов к вставке</div>
+      </header>
+
+      <section class="workspace" aria-label="OCR workspace">
+        <div class="input-panel">
+          <label class="drop-zone" id="pasteZone" for="fileInput" tabindex="0">
+            <input id="fileInput" type="file" accept="image/*">
+            <span class="empty-state" id="emptyState">
+              <strong>Вставьте изображение через Ctrl+V</strong>
+              <span>или загрузите файл</span>
+            </span>
+            <img id="previewImage" alt="Предпросмотр изображения" hidden>
+          </label>
+
+          <div class="controls" aria-label="Панель управления">
+            <label class="select-label" for="languageSelect">
+              <span>Язык OCR</span>
+              <select id="languageSelect">
+                <option value="rus">Русский</option>
+                <option value="eng">Английский</option>
+                <option value="rus+eng" selected>Русский + Английский</option>
+              </select>
+            </label>
+
+            <div class="button-row">
+              <button class="primary" id="recognizeButton" type="button" disabled>
+                Распознать текст
+              </button>
+              <button id="copyButton" type="button" disabled>Копировать текст</button>
+              <button id="clearButton" type="button">Очистить</button>
+            </div>
+          </div>
+
+          <div class="progress-wrap" aria-live="polite">
+            <div class="progress-meta">
+              <span id="progressLabel">Ожидание изображения</span>
+              <span id="progressValue">0%</span>
+            </div>
+            <progress id="progressBar" value="0" max="100"></progress>
+          </div>
+        </div>
+
+        <div class="result-panel">
+          <label for="resultText">Результат OCR</label>
+          <textarea
+            id="resultText"
+            spellcheck="false"
+            placeholder="Распознанный текст появится здесь. Его можно редактировать вручную."
+          ></textarea>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
